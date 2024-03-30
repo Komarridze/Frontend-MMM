@@ -9,7 +9,7 @@ body {
     margin: 0;
     height: 100vh;
     width: 100vw;
-    background: radial-gradient(#3a3042, #1f0d2e);
+    background: radial-gradient(#443a4d, #2b153d);
     padding-top:3vh;
     padding-left:3vw;
     padding-right:3vw;
@@ -27,7 +27,8 @@ body {
 
 logo {
     width: 10%;
-    background:linear-gradient(to right,#F0DE54 0 90%, #ef492e 90% 100%);
+    background:#F0DE54;
+    /* background:linear-gradient(to right,#F0DE54 0 90%, #ef492e 90% 100%); */
     font-family: "merriweather", serif;
     font-weight: 900;
     font-style: italic;
@@ -42,7 +43,7 @@ logo {
 .header {
     color: #fff;
     display: flex;
-    justify-content: right;
+    flex-direction: row-reverse;
     width: 85%;
     margin-left: 5%;
 }
@@ -137,3 +138,8 @@ fieldset {
 .username::placeholder {
     color:#d2cbcb;
 }
+
+.bio::placeholder {
+    color:#d2cbcb;
+}
+
