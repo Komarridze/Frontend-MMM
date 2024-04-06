@@ -62,25 +62,30 @@
 import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url';
+import bodyParser from 'body-parser'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
-app.use(express.static(path.join(__dirname, '/../public')));
+
+const urlencodedParser = bodyParser.urlencoded({
+    extended: false,
+});
+
+app.use(express.static(path.join(__dirname, '/public')));
 
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname + '/../templates/login.html'))
-    console.log('ajaja')
+app.get('/', urlencodedParser, (req, res) => {
+    res.sendFile(path.join(__dirname + '/templates/login.html'))
 })
 
-app.get('../templates/login.html', (req, res) => {
-    var username = req.body.username;
-    var bio = req.body.bio;
-    var password = req.body.password;
-    console.log(username, bio, password)
-    res.sendFile('../templates/main.html')
+app.post('/main', urlencodedParser, (req, res) => {
+    // var username = req.body.userName;
+    // var bio = req.body.userBio;
+    // var password = req.body.userPassword;
+    console.log(req.body)
+    // res.sendFile('../templates/main.html')
 })
 
 app.listen(5500, () => {
