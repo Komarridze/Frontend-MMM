@@ -4,12 +4,12 @@ let hidden = false;
 hideshowDiv.addEventListener('click', function () {
     if (hidden == false) {
         hidden = true;
-        hideshow.src = '/src/img/show-password.png';
+        hideshow.src = '../src/img/show-password.png';
     }
 
     else if (hidden == true) {
         hidden = false;
-        hideshow.src = '/src/img/hide-password.png';
+        hideshow.src = '../src/img/hide-password.png';
     }
 });
 
