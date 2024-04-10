@@ -27,7 +27,7 @@
 //         },
 //         userkey: {
 //             type: 'string',
-//             maxLength: 21,
+//             maxLength: 9,
 //         },
 //         bio: {
 //             type: 'string',
@@ -68,6 +68,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
+const upperCase= new RegExp('[A-Z]');
+const lowerCase= new RegExp('^[a-z]');
+const numbers = new RegExp('[0-9]');
 
 const urlencodedParser = bodyParser.urlencoded({
     extended: false,
@@ -81,13 +84,33 @@ app.get('/', urlencodedParser, (req, res) => {
 })
 
 app.post('/main', urlencodedParser, (req, res) => {
-    // var username = req.body.userName;
-    // var bio = req.body.userBio;
-    // var password = req.body.userPassword;
-    console.log(req.body)
-    // res.sendFile('../templates/main.html')
+    var username = req.body.userName;
+    var bio = req.body.userBio;
+    var password = req.body.userPassword;
+    // ? console.log(req.body)
+
+    if (!(username.match(/\W/)) &&
+    (password.toLowerCase().match(lowerCase) &&  password.toLowerCase().match(numbers))
+    )  
+    {
+    res.sendFile(path.join(__dirname + '/templates/main.html'))
+    }
+
+    
+    else {
+        res.sendFile(path.join(__dirname + '/templates/login.html'))
+    } 
+ 
+  
+
+
+    
 })
 
 app.listen(5500, () => {
     console.log('Listening on port 5500...')
 })
+
+// function unsupportedChar() {
+//     window.alert(`Ім'я користувача і пароль не можуть включати символи /, ", ', =, + та пробіли`);
+// }
