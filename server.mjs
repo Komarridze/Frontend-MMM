@@ -68,9 +68,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
-const upperCase= new RegExp('[A-Z]');
-const lowerCase= new RegExp('^[a-z]');
-const numbers = new RegExp('[0-9]');
 
 const urlencodedParser = bodyParser.urlencoded({
     extended: false,
@@ -83,6 +80,13 @@ app.get('/', urlencodedParser, (req, res) => {
     res.sendFile(path.join(__dirname + '/templates/login.html'))
 })
 
+// >> TO main
+
+app.get('/main', urlencodedParser, (req, res) => {
+    res.sendFile(path.join(__dirname + '/templates/login.html'))
+
+})
+
 app.post('/main', urlencodedParser, (req, res) => {
     var username = req.body.userName;
     var bio = req.body.userBio;
@@ -90,7 +94,7 @@ app.post('/main', urlencodedParser, (req, res) => {
     // ? console.log(req.body)
 
     if (!(username.match(/\W/)) &&
-    (password.toLowerCase().match(lowerCase) &&  password.toLowerCase().match(numbers))
+    (!(password.match(/\W/)))
     )  
     {
     res.sendFile(path.join(__dirname + '/templates/main.html'))
@@ -101,9 +105,9 @@ app.post('/main', urlencodedParser, (req, res) => {
         res.sendFile(path.join(__dirname + '/templates/login.html'))
     } 
  
-  
+    //! password.toLowerCase()
 
-
+    
     
 })
 

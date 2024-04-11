@@ -11,3 +11,73 @@ body {
     background: radial-gradient(#443a4d, #2b153d);
 }
 
+.topbar {
+    background-color: #1F0D2E;
+    color:#fff;
+    padding-top:1vh;
+    padding-left:1vw;
+    font-family: "merriweather", serif;
+    font-weight: 900;
+    font-style: italic;
+}
+
+.bottomarea {
+    background-color: #1F0D2E;
+    color:#fff;
+    padding-top:1vh;
+    padding-left:1vw;
+}
+
+
+/** chn-cht-msgarea **/
+
+.channels {
+    background-color: #283D56;
+    color:#fff;
+    padding-top:1vh;
+    padding-left:1vw;
+    padding-bottom:1vh;
+    padding-right:1vh;
+}
+
+.chats {
+    background-color: #1F3045;
+    color:#fff;
+    padding-top:1vh;
+    padding-left:1vw;
+    padding-bottom:1vh;
+    padding-right:1vh;
+}
+
+.messagearea { 
+    background-color: #3b5475;
+    color:#fff;
+    padding-top:1vh;
+    padding-left:1vw;
+    padding-bottom:1vh;
+    padding-right:1vh;
+}
+
+
+
+
+
+
+
+/** inter **/
+.inter-high {
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-size: 20px;
+    font-weight: 500;
+    font-style: normal;
+    font-variation-settings: "slnt" 0;
+}
+
+.inter {
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+    font-variation-settings: "slnt" 0;
+}
