@@ -24,8 +24,6 @@ body {
 .bottomarea {
     background-color: #1F0D2E;
     color:#fff;
-    padding-top:1vh;
-    padding-left:1vw;
 }
 
 
@@ -37,7 +35,7 @@ body {
     padding-top:1vh;
     padding-left:1vw;
     padding-bottom:1vh;
-    padding-right:1vh;
+    padding-right:1vw;
 }
 
 .chats {
@@ -46,7 +44,7 @@ body {
     padding-top:1vh;
     padding-left:1vw;
     padding-bottom:1vh;
-    padding-right:1vh;
+    padding-right:1vw;
 }
 
 .messagearea { 
@@ -55,11 +53,17 @@ body {
     padding-top:1vh;
     padding-left:1vw;
     padding-bottom:1vh;
-    padding-right:1vh;
+    padding-right:1vw;
 }
 
 
 
+/* >> pf */
+
+.pf-info {
+    background-color:#1F0D2E;
+    border: 1px dotted #fff;
+}
 
 
 

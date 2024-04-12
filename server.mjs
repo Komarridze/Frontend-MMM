@@ -63,6 +63,7 @@ import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url';
 import bodyParser from 'body-parser'
+import 'localstorage-polyfill'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -75,6 +76,15 @@ const urlencodedParser = bodyParser.urlencoded({
 
 app.use(express.static(path.join(__dirname, '/public')));
 
+// >> Session Storage
+
+    global.localStorage.setItem("loggedin", false)
+    global.localStorage.setItem("userName", '')
+    global.localStorage.setItem("userKey", '')
+
+
+    
+// >> TO home
 
 app.get('/', urlencodedParser, (req, res) => {
     res.sendFile(path.join(__dirname + '/templates/login.html'))
@@ -83,7 +93,9 @@ app.get('/', urlencodedParser, (req, res) => {
 // >> TO main
 
 app.get('/main', urlencodedParser, (req, res) => {
-    res.sendFile(path.join(__dirname + '/templates/login.html'))
+    if (global.localStorage.getItem("loggedin") == false)
+        res.sendFile(path.join(__dirname + '/templates/login.html'));
+    else res.sendFile(path.join(__dirname + '/templates/main.html'));
 
 })
 
@@ -97,7 +109,8 @@ app.post('/main', urlencodedParser, (req, res) => {
     (!(password.match(/\W/)))
     )  
     {
-    res.sendFile(path.join(__dirname + '/templates/main.html'))
+        global.localStorage.setItem("loggedin", true);
+    res.sendFile(path.join(__dirname + '/templates/main.html'));
     }
 
     
