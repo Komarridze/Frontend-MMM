@@ -97,10 +97,12 @@ fieldset {
     border:transparent;
 }
 
-.tag {
+.tag::placeholder {
     font-family: "merriweather", serif;
     font-weight: 900;
     font-style: italic;
+    color:#fff;
+    font-size: 120%;
 }
 
 .inter-high {

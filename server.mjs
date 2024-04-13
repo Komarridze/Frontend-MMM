@@ -68,13 +68,11 @@ import 'localstorage-polyfill'
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
-
+app.use(express.static(path.join(__dirname, '/public')));
 
 const urlencodedParser = bodyParser.urlencoded({
     extended: false,
 });
-
-app.use(express.static(path.join(__dirname, '/public')));
 
 // >> Session Storage
 
@@ -86,6 +84,9 @@ app.use(express.static(path.join(__dirname, '/public')));
     
 // >> TO home
 
+
+
+app.set('view engine', 'ejs');
 app.get('/', urlencodedParser, (req, res) => {
     res.sendFile(path.join(__dirname + '/templates/login.html'))
 })
@@ -95,7 +96,18 @@ app.get('/', urlencodedParser, (req, res) => {
 app.get('/main', urlencodedParser, (req, res) => {
     if (global.localStorage.getItem("loggedin") == false)
         res.sendFile(path.join(__dirname + '/templates/login.html'));
-    else res.sendFile(path.join(__dirname + '/templates/main.html'));
+    else {
+        let data = {
+            username: global.localStorage.getItem('userName'),
+            tag: global.localStorage.getItem("userKey")
+        }
+
+        res.sendFile(path.join(__dirname + '/templates/main.html'));
+    }
+    
+    
+    
+    
 
 })
 
@@ -103,14 +115,26 @@ app.post('/main', urlencodedParser, (req, res) => {
     var username = req.body.userName;
     var bio = req.body.userBio;
     var password = req.body.userPassword;
-    // ? console.log(req.body)
+    var tag = req.body.userTag;
+
+    global.localStorage.setItem("userName", username)
+    global.localStorage.setItem("userKey", tag)
+    console.log(req.body)
+
+    let data = {
+        username: username,
+        tag: tag
+    }
 
     if (!(username.match(/\W/)) &&
     (!(password.match(/\W/)))
     )  
     {
         global.localStorage.setItem("loggedin", true);
-    res.sendFile(path.join(__dirname + '/templates/main.html'));
+    res.render('main', {
+        userData: data
+
+    });
     }
 
     

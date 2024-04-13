@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "axios": "^1.6.8",
+    "ejs": "^3.1.10",
     "express": "^4.19.2",
     "localstorage-polyfill": "^1.0.1",
     "rxdb": "^15.16.0",

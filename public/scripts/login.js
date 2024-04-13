@@ -16,7 +16,7 @@ function dec2hex (dec) {
 
   
 let id = generateId(8);
-userTag.innerHTML = `@${id}`
+userTag.value = `@${id}`
   // "c1a050a4cd1556948d41"
 
 let userpass = document.querySelector(".password-input");
