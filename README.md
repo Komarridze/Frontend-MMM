@@ -1,1 +1,1 @@
-# Launch site by running <node server.mjs> in Terminal
+# Launch site by running "node server.mjs" in Terminal
