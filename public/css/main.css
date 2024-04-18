@@ -15,10 +15,13 @@ body {
     background-color: #1F0D2E;
     color:#fff;
     padding-top:1vh;
-    padding-left:1vw;
     font-family: "merriweather", serif;
     font-weight: 900;
     font-style: italic;
+}
+
+text {
+    padding-left: 1vw;
 }
 
 .bottomarea {

@@ -1,63 +1,8 @@
-// import { addRxPlugin } from 'rxdb';
-// import { RxDBDevModePlugin, disableWarnings } from 'rxdb/plugins/dev-mode';
-// addRxPlugin(RxDBDevModePlugin);
-
-// disableWarnings()
-
-// import { createRxDatabase } from 'rxdb';
-// import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
-
-// const kaktusdb = await createRxDatabase({
-//   name: 'kaktus',
-//   storage: getRxStorageDexie()
-// });
-
-// const userSchema = {
-//     version: 0,
-//     primaryKey: 'userkey',
-//     type: 'object',
-//     properties: {
-//         id: {
-//             type: 'integer',
-//             maxLength: 20 // <- the primary key must have set maxLength
-//         },
-//         username: {
-//             type: 'string',
-//             maxLength: 20,
-//         },
-//         userkey: {
-//             type: 'string',
-//             maxLength: 9,
-//         },
-//         bio: {
-//             type: 'string',
-//             maxLength: 100,
-//         },
-//         password: {
-//             type: 'string',
-//             maxLength:15
-//         }
-//     },
-//     required: ['id', 'username', 'userkey', 'password']
-// }
-
-// await kaktusdb.addCollections({
-//     todos: {
-//       schema: userSchema
-//     }
-//   });
-
-// const initiate = await kaktusdb.todos.insert({
-//     id: 0,
-//     username: 'Tretitz',
-//     userkey: '@tretitz',
-//     password: 'hueta151'
-// });
-
-
-
+import sqlite3 from 'sqlite3'
+// const db = new sqlite3.Database(":memory:")
 
 // >> Server
+
 
 import express from 'express'
 import path from 'path'
@@ -74,51 +19,70 @@ const urlencodedParser = bodyParser.urlencoded({
     extended: false,
 });
 
-// >> Session Storage
-
-    global.localStorage.setItem("loggedin", false)
-    global.localStorage.setItem("userName", '')
-    global.localStorage.setItem("userKey", '')
 
 
     
 // >> TO home
 
-
+console.log(global.localStorage.getItem("userName"))
 
 app.set('view engine', 'ejs');
+
 app.get('/', urlencodedParser, (req, res) => {
+    if (global.localStorage.getItem("loggedin") != 'true')
     res.sendFile(path.join(__dirname + '/templates/login.html'))
+    else{
+    let data = {
+        username: global.localStorage.getItem('userName'),
+        tag: global.localStorage.getItem("userKey")
+    }
+
+    res.render('main', {
+        userData: data
+
+    });
+}
+    
 })
 
 // >> TO main
 
 app.get('/main', urlencodedParser, (req, res) => {
-    if (global.localStorage.getItem("loggedin") == false)
-        res.sendFile(path.join(__dirname + '/templates/login.html'));
-    else {
+    if (global.localStorage.getItem("loggedin") == 'true') {
+        
+        console.log(global.localStorage.getItem("userName"))
         let data = {
             username: global.localStorage.getItem('userName'),
             tag: global.localStorage.getItem("userKey")
         }
 
-        res.sendFile(path.join(__dirname + '/templates/main.html'));
+        console.log(data)
+
+        res.render('main', {
+            userData: data
+        });
+
     }
-    
+    else
+    res.sendFile(path.join(__dirname + '/templates/login.html'));
     
     
     
 
-})
+});
 
 app.post('/main', urlencodedParser, (req, res) => {
+    if (req.body.state == 'signin') {
     var username = req.body.userName;
     var bio = req.body.userBio;
     var password = req.body.userPassword;
     var tag = req.body.userTag;
 
-    global.localStorage.setItem("userName", username)
-    global.localStorage.setItem("userKey", tag)
+    }
+    
+
+    global.localStorage.getItem("userName") == null ? global.localStorage.setItem("userName", username) : {};
+    global.localStorage.getItem("userKey") == null ? global.localStorage.setItem("userKey", tag) : {};
     console.log(req.body)
 
     let data = {
@@ -127,7 +91,7 @@ app.post('/main', urlencodedParser, (req, res) => {
     }
 
     if (!(username.match(/\W/)) &&
-    (!(password.match(/\W/)))
+    (!(password.match(/\W/))) && (username != "") && (password != "")
     )  
     {
         global.localStorage.setItem("loggedin", true);
@@ -151,7 +115,3 @@ app.post('/main', urlencodedParser, (req, res) => {
 app.listen(5500, () => {
     console.log('Listening on port 5500...')
 })
-
-// function unsupportedChar() {
-//     window.alert(`Ім'я користувача і пароль не можуть включати символи /, ", ', =, + та пробіли`);
-// }
