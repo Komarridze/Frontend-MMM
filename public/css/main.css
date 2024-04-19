@@ -59,7 +59,42 @@ text {
     padding-right:1vw;
 }
 
+.searchbar {
+    border-radius: 3px;
+    padding-left: 1vw;
+    outline: none;
+    color:#000;
+    border-color: transparent;
+}
 
+#searchselector {
+    border-radius: 3px;
+    border-color: transparent;
+    outline: none;
+    background-color: #2e3d4f;
+    color:#fff;
+    cursor: pointer !important;
+}
+
+#searchselector::placeholder {
+    color:#fff;
+}
+
+
+
+
+.messagebar {
+    background-color: #2e3d4f;
+    border-radius: 3vh;
+    padding-left: 1vw;
+    outline: none;
+    color:#edecec;
+    border-color: transparent;
+}
+
+.messagebar::placeholder {
+    color:lightgray;
+}
 
 /* >> pf */
 
