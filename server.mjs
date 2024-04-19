@@ -1,5 +1,10 @@
 import sqlite3 from 'sqlite3'
-// const db = new sqlite3.Database(":memory:")
+import {open} from 'sqlite'
+
+const dbPromise = open({
+    filename: "data.db",
+    driver: sqlite3.Database
+})
 
 // >> Server
 
@@ -28,7 +33,10 @@ console.log(global.localStorage.getItem("userName"))
 
 app.set('view engine', 'ejs');
 
-app.get('/', urlencodedParser, (req, res) => {
+app.get('/', urlencodedParser, async (req, res) => {
+    const db = await dbPromise;
+    const users = await db.all('SELECT * FROM Users;')
+    console.log(users)
     if (global.localStorage.getItem("loggedin") != 'true')
     res.sendFile(path.join(__dirname + '/templates/login.html'))
     else{
@@ -36,6 +44,8 @@ app.get('/', urlencodedParser, (req, res) => {
         username: global.localStorage.getItem('userName'),
         tag: global.localStorage.getItem("userKey")
     }
+
+
 
     res.render('main', {
         userData: data
@@ -71,40 +81,84 @@ app.get('/main', urlencodedParser, (req, res) => {
 
 });
 
-app.post('/main', urlencodedParser, (req, res) => {
+app.post('/main', urlencodedParser, async (req, res) => {
     if (req.body.state == 'signin') {
-    var username = req.body.userName;
-    var bio = req.body.userBio;
-    var password = req.body.userPassword;
-    var tag = req.body.userTag;
+
+        var username = req.body.userName;
+        var bio = req.body.userBio;
+        var password = req.body.userPassword;
+        var tag = req.body.userTag;
+
+        
+        
+
+        global.localStorage.setItem("userName", username);
+        global.localStorage.setItem("userKey", tag);
+        console.log(req.body)
+
+        let data = {
+            username: username,
+            tag: tag
+        }
+
+        if (!(username.match(/\W/)) &&
+        (!(password.match(/\W/))) && (username != "") && (password != ""))  
+
+        {
+            global.localStorage.setItem("loggedin", true);
+            res.render('main', {
+                userData: data
+
+            });
+    
+        }
+
+        else {
+            res.sendFile(path.join(__dirname + '/templates/login.html'))
+        } 
+        
 
     }
     
+    if (req.body.state == 'login') {
+        var userkey = req.body.userKey;
+        var password = req.body.userPassword;
 
-    global.localStorage.getItem("userName") == null ? global.localStorage.setItem("userName", username) : {};
-    global.localStorage.getItem("userKey") == null ? global.localStorage.setItem("userKey", tag) : {};
-    console.log(req.body)
+        const db = await dbPromise;
+        const users = await db.all('SELECT * FROM Users;');
+        
 
-    let data = {
-        username: username,
-        tag: tag
+        
+        if (users.length != 0) {
+            const user = users[0];
+            if (
+                user.userPassword == password
+
+            ) {
+
+                let data = {
+                    username: user.userName,
+                    tag: userkey
+                }
+
+                global.localStorage.setItem("loggedin", true);
+                global.localStorage.setItem("userName", user.userName);
+                global.localStorage.setItem("userKey", userkey);
+
+                res.render('main', {
+                    userData: data
+
+                });
+
+            }
+
+            else {res.sendFile(path.join(__dirname + '/templates/login.html'))}
+        }
+
+        else {res.sendFile(path.join(__dirname + '/templates/login.html'))}
+        
     }
-
-    if (!(username.match(/\W/)) &&
-    (!(password.match(/\W/))) && (username != "") && (password != "")
-    )  
-    {
-        global.localStorage.setItem("loggedin", true);
-    res.render('main', {
-        userData: data
-
-    });
-    }
-
     
-    else {
-        res.sendFile(path.join(__dirname + '/templates/login.html'))
-    } 
  
     //! password.toLowerCase()
 
@@ -112,6 +166,14 @@ app.post('/main', urlencodedParser, (req, res) => {
     
 })
 
-app.listen(5500, () => {
-    console.log('Listening on port 5500...')
-})
+const setup = async () => {
+    const db = await dbPromise;
+    await db.migrate();
+    app.listen(5500, () => {
+        console.log('Listening on port 5500...')
+    })
+
+}
+
+
+setup()
