@@ -101,17 +101,28 @@ app.post('/main', urlencodedParser, async (req, res) => {
             tag: tag
         }
 
-        if (!(username.match(/\W/)) &&
+        const db = await dbPromise;
+        const usersSameKey = await db.all('SELECT * FROM Users WHERE userKey = (?);', tag);
+
+        if (usersSameKey.length == 0) {
+
+            if (!(username.match(/\W/)) &&
         (!(password.match(/\W/))) && (username != "") && (password != ""))  
 
         {
             global.localStorage.setItem("loggedin", true);
+
+            await db.run('INSERT INTO Users (userKey, userName, userBio, userPassword) VALUES (?, ?, ?, ?)', tag, username, bio, password)
+
             res.render('main', {
                 userData: data
 
             });
     
         }
+        }
+
+        
 
         else {
             res.sendFile(path.join(__dirname + '/templates/login.html'))
