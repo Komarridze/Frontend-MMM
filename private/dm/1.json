@@ -1,0 +1,17 @@
+{
+    "domain": "dev",
+    "time": "undefined",
+    "initiate": "@tretitz",
+    "receiver": "@e4ebcd36",
+
+
+    "messages" : [
+        {
+            "sender": "@tretitz",
+            "time": "undefined",
+            "text": "hello world",
+            "reactions": "xr00, xr01",
+            "status": "received"
+        }
+    ]
+}

@@ -9,8 +9,16 @@ CREATE TABLE Users (
     userPassword TEXT (15)  NOT NULL
 );
 
+CREATE TABLE Directs (
+    Identifier NUMERIC (20) PRIMARY KEY DESC,
+    Initiate   TEXT (15)    REFERENCES Users (userKey),
+    Receiver   TEXT (15)    REFERENCES Users (userKey) 
+);
+
+
 
 
 -- Down
 
 DROP TABLE Users;
+DROP TABLE Directs;
