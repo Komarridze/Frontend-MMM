@@ -80,7 +80,19 @@ text {
     color:#fff;
 }
 
+group {
+    border-radius: 3px;
+    background: #8496ac;
+    color:#fff;
+    padding-left: 1vw;
+    padding-right: 1vw;
+    height: 5%;
+    font-size: 12px;
+}
 
+group:hover {
+    background: #6d7c8f;
+}
 
 
 .messagebar {

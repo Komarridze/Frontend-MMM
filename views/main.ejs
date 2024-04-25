@@ -24,15 +24,25 @@
     
     
     </div>
-    <div class="chats inter" style="width:15%">s</div>
+    <div class="chats inter" style="width:15%;display: flex;flex-direction: column;">
+        <form method="POST" action="/openchat/chatID" id="chatform" style="display: none;"><input name="chatID" id="chatID" readonly><input name="newmessage" id="newmessage" readonly></form>
+
+        <group class="inter" onclick="connectChat(1)">:dev-chat [unlocated]</group>
+    
+    </div>
         <!-- SECTION MessageArea -->
     <div class="messagearea inter" style="width:80%;display: flex;flex-direction: column;">
         <div style="display: flex;flex-direction: row;height: 5%;">
             <input name="srch-sel" id="searchselector" class="inter" placeholder=":main" style="width:5%;text-align: center;" readonly>
             <input class="searchbar inter" style="width:20%; background-color: #F0DE54;margin-left:2%" placeholder="Пошук в <тут плейс>">
         </div>
-        <div id="message-container" class="inter" style="height: 88%;padding-top: 2vh;padding-bottom: 2vh;">s</div>
-        <input class="messagebar inter" style="height: 7%;" placeholder="Написати у :main">
+        <div id="message-container" class="inter" style="height: 88%;padding-top: 2vh;padding-bottom: 2vh;display: flex;flex-direction: column;">
+            
+            <%- userData.messages %>
+        
+        
+        </div>
+        <input id="messagebar" class="messagebar inter" style="height: 7%;" placeholder="Написати у :main" autofocus>
     
     </div>
 
@@ -53,3 +63,35 @@
     </div>
 
 </body>
+
+<script>
+let chatForm = document.getElementById('chatform')
+let chatid = document.getElementById('chatID')
+
+function connectChat(id) {
+    chatForm.action = `/openchat/${id}`;
+    chatid.value = id;
+    chatForm.submit()
+}
+
+
+// >> Keystroke
+let newmessage = document.getElementById('newmessage')
+
+
+function handleShortcut(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        let currentUrlsbs = window.location.href.substring(window.location.href.lastIndexOf('/') + 1);
+        if (currentUrlsbs != 'main' && currentUrlsbs != 'settings') {
+            console.log(document.getElementById('messagebar').value.replace('/"/g', '\\"'))
+            newmessage.value = document.getElementById('messagebar').value.replace('/"/g', '\\"')
+            connectChat(currentUrlsbs)
+            newmessage.value = '';
+        }
+    }
+}
+document.addEventListener("keydown", handleShortcut);
+
+
+</script>
