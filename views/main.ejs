@@ -24,10 +24,11 @@
     
     
     </div>
-    <div class="chats inter" style="width:15%;display: flex;flex-direction: column;">
+    <div class="chats inter" style="width:15%;display: flex;flex-direction: column;gap: 2%;">
         <form method="POST" action="/openchat/chatID" id="chatform" style="display: none;"><input name="chatID" id="chatID" readonly><input name="newmessage" id="newmessage" readonly></form>
 
         <group class="inter" onclick="connectChat(1)">:dev-chat [unlocated]</group>
+        <%- userData.chats %>
     
     </div>
         <!-- SECTION MessageArea -->

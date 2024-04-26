@@ -6,7 +6,8 @@ CREATE TABLE Users (
                             NOT NULL,
     userName     TEXT (15)  NOT NULL,
     userBio      TEXT (100),
-    userPassword TEXT (15)  NOT NULL
+    userPassword TEXT (15)  NOT NULL,
+    chats        TEXT
 );
 
 CREATE TABLE Directs (
