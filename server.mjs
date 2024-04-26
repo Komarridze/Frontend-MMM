@@ -15,7 +15,6 @@ import path from 'path'
 import { fileURLToPath } from 'url';
 import bodyParser from 'body-parser'
 import 'localstorage-polyfill'
-import { getLocal } from 'rxdb/plugins/local-documents'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -31,14 +30,14 @@ const urlencodedParser = bodyParser.urlencoded({
     
 // >> TO home
 
-console.log(global.localStorage.getItem("userName"))
+// ?debug console.log(global.localStorage.getItem("userName"))
 
 app.set('view engine', 'ejs');
 
 app.get('/', urlencodedParser, async (req, res) => {
     const db = await dbPromise;
     const users = await db.all('SELECT * FROM Users;')
-    console.log(users)
+  
     if (global.localStorage.getItem("loggedin") != 'true')
     res.sendFile(path.join(__dirname + '/templates/login.html'))
     else{
@@ -62,13 +61,13 @@ app.get('/', urlencodedParser, async (req, res) => {
 app.get('/main', urlencodedParser, (req, res) => {
     if (global.localStorage.getItem("loggedin") == 'true') {
         
-        console.log(global.localStorage.getItem("userName"))
+      
         let data = {
             username: global.localStorage.getItem('userName'),
             tag: global.localStorage.getItem("userKey")
         }
 
-        console.log(data)
+       
 
         res.render('main', {
             userData: data
@@ -96,7 +95,8 @@ app.post('/main', urlencodedParser, async (req, res) => {
 
         global.localStorage.setItem("userName", username);
         global.localStorage.setItem("userKey", tag);
-        console.log(req.body)
+    
+
 
         let data = {
             username: username,
@@ -115,6 +115,8 @@ app.post('/main', urlencodedParser, async (req, res) => {
             global.localStorage.setItem("loggedin", true);
 
             await db.run('INSERT INTO Users (userKey, userName, userBio, userPassword) VALUES (?, ?, ?, ?)', tag, username, bio, password)
+
+
 
             res.render('main', {
                 userData: data
@@ -138,20 +140,36 @@ app.post('/main', urlencodedParser, async (req, res) => {
         var password = req.body.userPassword;
 
         const db = await dbPromise;
-        const users = await db.all('SELECT * FROM Users;');
+        const users = await db.all('SELECT * FROM Users WHERE userKey = (?);', userkey);
         
 
         
         if (users.length != 0) {
             const user = users[0];
-            if (
-                user.userPassword == password
+            if (user.userPassword == password) {
 
-            ) {
+
+                let chatarray = user.chats.split(';')
+                let currentchats = []
+                for (let el of chatarray) {
+                    let chat = await db.all('SELECT * FROM Directs WHERE Identifier = (?)', +el)
+                    chat.length == 0 ? {} : currentchats.push(chat[0])
+                }
+
+                
+
+                var chatstring = ''
+
+                for (let el of currentchats) {
+                    let name = ''
+                    el.Initiate == user.userName ? name = el.Receiver : name = el.Initiate;
+                    chatstring += `<group class="inter" onclick="connectChat(${el.Identifier})">${name}</group>`
+                }
 
                 let data = {
                     username: user.userName,
-                    tag: userkey
+                    tag: userkey,
+                    chats: chatstring
                 }
 
                 global.localStorage.setItem("loggedin", true);
@@ -180,9 +198,39 @@ app.post('/main', urlencodedParser, async (req, res) => {
 })
 
 app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
+    const db = await dbPromise;
+    const users = await db.all('SELECT * FROM Users WHERE userKey = (?);', global.localStorage.getItem('userKey'));
+        
+
+        
+        if (users.length != 0) {
+            const user = users[0];
+            
+
+
+                let chatarray = user.chats.split(';')
+                let currentchats = []
+                for (let el of chatarray) {
+                    let chat = await db.all('SELECT * FROM Directs WHERE Identifier = (?)', +el)
+                    chat.length == 0 ? {} : currentchats.push(chat[0])
+                }
+
+                
+
+                var chatstring = ''
+
+                for (let el of currentchats) {
+                    let name = ''
+                    el.Initiate == user.userName ? name = el.Receiver : name = el.Initiate;
+                    chatstring += `<group class="inter" onclick="connectChat(${el.Identifier})">${name}</group>`
+                }
+                
+            
+        }
+
     var chatID = req.params.chatID;
     var chatdata = JSON.parse(fs.readFileSync(path.join(__dirname + `/private/dm/${chatID}.json`)));
-    console.log(req.body.newmessage)
+   
     if (req.body.newmessage != '') {
         chatdata.messages.push({
             "sender": global.localStorage.getItem('userName'),
@@ -198,7 +246,7 @@ app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
     }
 
 
-    console.log(chatdata.messages)
+    
     let msgs = '';
     for (let message of chatdata.messages) {
         msgs += `<msg class="inter"><i style="font-size:60%;color:lightgray;">${message.sender}: &nbsp;</i>${message.text}</msg>`;
@@ -207,7 +255,8 @@ app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
     let data = {
         username: global.localStorage.getItem('userName'),
         tag: global.localStorage.getItem('userKey'),
-        messages: msgs
+        messages: msgs,
+        chats: chatstring
     }
 
     res.render('main', {
