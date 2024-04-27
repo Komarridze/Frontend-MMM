@@ -114,7 +114,7 @@ app.post('/main', urlencodedParser, async (req, res) => {
         {
             global.localStorage.setItem("loggedin", true);
 
-            await db.run('INSERT INTO Users (userKey, userName, userBio, userPassword) VALUES (?, ?, ?, ?)', tag, username, bio, password)
+            await db.run('INSERT INTO Users (userKey, userName, userBio, userPassword, chats) VALUES (?, ?, ?, ?, ?)', tag, username, bio, password, '0;')
 
 
 
@@ -195,6 +195,56 @@ app.post('/main', urlencodedParser, async (req, res) => {
 
     
     
+})
+
+app.get('/openchat/:chatID', urlencodedParser, async (req, res) => {
+    if (global.localStorage.getItem("loggedin") == 'true') {
+        
+        const db = await dbPromise;
+    const users = await db.all('SELECT * FROM Users WHERE userKey = (?);', global.localStorage.getItem('userKey'));
+        
+
+        
+        if (users.length != 0) {
+            const user = users[0];
+            
+
+
+                let chatarray = user.chats.split(';')
+                let currentchats = []
+                for (let el of chatarray) {
+                    let chat = await db.all('SELECT * FROM Directs WHERE Identifier = (?)', +el)
+                    chat.length == 0 ? {} : currentchats.push(chat[0])
+                }
+
+                
+
+                var chatstring = ''
+
+                for (let el of currentchats) {
+                    let name = ''
+                    el.Initiate == user.userName ? name = el.Receiver : name = el.Initiate;
+                    chatstring += `<group class="inter" onclick="connectChat(${el.Identifier})">${name}</group>`
+                }
+                
+            
+        }
+      
+        let data = {
+            username: global.localStorage.getItem('userName'),
+            tag: global.localStorage.getItem("userKey"),
+            chats: chatstring
+        }
+
+       
+
+        res.render('main', {
+            userData: data
+        });
+
+    }
+    else
+    res.sendFile(path.join(__dirname + '/templates/login.html'));
 })
 
 app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
