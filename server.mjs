@@ -284,7 +284,7 @@ app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
    
     if (req.body.newmessage != '') {
         chatdata.messages.push({
-            "sender": global.localStorage.getItem('userName'),
+            "sender": global.localStorage.getItem('userKey'),
             "time": "undefined",
             "text": req.body.newmessage,
             "reactions": "none",
