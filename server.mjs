@@ -129,6 +129,7 @@ app.post('/main', urlencodedParser, async (req, res) => {
         
 
         else {
+            alert('Неправильні дані')
             res.sendFile(path.join(__dirname + '/templates/login.html'))
         } 
         
