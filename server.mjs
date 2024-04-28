@@ -1,11 +1,15 @@
 import sqlite3 from 'sqlite3'
 import {open} from 'sqlite'
 import fs from 'fs'
+import {Server} from 'socket.io'
+import {createServer} from 'node:http'
+
 
 const dbPromise = open({
     filename: "data.db",
     driver: sqlite3.Database
 })
+
 
 // >> Server
 
@@ -15,15 +19,37 @@ import path from 'path'
 import { fileURLToPath } from 'url';
 import bodyParser from 'body-parser'
 import 'localstorage-polyfill'
+import {Router} from 'express'
+import session from 'express-session'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 app.use(express.static(path.join(__dirname, '/public')));
+app.use(session({
+    secret: 'secret-key',
+  resave: false,
+  saveUninitialized: false
+}))
 
 const urlencodedParser = bodyParser.urlencoded({
     extended: false,
 });
+
+const server = createServer(app)
+const router = Router()
+
+const io = new Server(server)
+io.on('connection', (socket) => {
+    socket.on('newmessage', (chatid) => {
+        console.log('newmessage: ' + chatid)
+        io.emit('refreshchat', chatid)
+    })
+    socket.on('confirmrefreshchat', (chatidx) => {
+        console.log('arara')
+    })
+});
+
 
 
 
@@ -37,13 +63,13 @@ app.set('view engine', 'ejs');
 app.get('/', urlencodedParser, async (req, res) => {
     const db = await dbPromise;
     const users = await db.all('SELECT * FROM Users;')
-  
-    if (global.localStorage.getItem("loggedin") != 'true')
+    console.log(req.session.loggedin)
+    if (req.session.loggedin != true)
     res.sendFile(path.join(__dirname + '/templates/login.html'))
     else{
     let data = {
-        username: global.localStorage.getItem('userName'),
-        tag: global.localStorage.getItem("userKey")
+        username: req.session.username,
+        tag: req.session.userkey
     }
 
 
@@ -59,12 +85,12 @@ app.get('/', urlencodedParser, async (req, res) => {
 // >> TO main
 
 app.get('/main', urlencodedParser, (req, res) => {
-    if (global.localStorage.getItem("loggedin") == 'true') {
+    if (req.session.loggedin == true) {
         
       
         let data = {
-            username: global.localStorage.getItem('userName'),
-            tag: global.localStorage.getItem("userKey")
+            username: req.session.username,
+            tag: req.session.userkey
         }
 
        
@@ -93,8 +119,8 @@ app.post('/main', urlencodedParser, async (req, res) => {
         
         
 
-        global.localStorage.setItem("userName", username);
-        global.localStorage.setItem("userKey", tag);
+        req.session.username = username
+        req.session.userkey = tag
     
 
 
@@ -112,7 +138,7 @@ app.post('/main', urlencodedParser, async (req, res) => {
         (!(password.match(/\W/))) && (username != "") && (password != ""))  
 
         {
-            global.localStorage.setItem("loggedin", true);
+            req.session.loggedin = true
 
             await db.run('INSERT INTO Users (userKey, userName, userBio, userPassword, chats) VALUES (?, ?, ?, ?, ?)', tag, username, bio, password, '0;')
 
@@ -173,9 +199,9 @@ app.post('/main', urlencodedParser, async (req, res) => {
                     chats: chatstring
                 }
 
-                global.localStorage.setItem("loggedin", true);
-                global.localStorage.setItem("userName", user.userName);
-                global.localStorage.setItem("userKey", userkey);
+                req.session.loggedin = true
+                req.session.username = user.userName
+                req.session.userkey = userkey
 
                 res.render('main', {
                     userData: data
@@ -199,10 +225,10 @@ app.post('/main', urlencodedParser, async (req, res) => {
 })
 
 app.get('/openchat/:chatID', urlencodedParser, async (req, res) => {
-    if (global.localStorage.getItem("loggedin") == 'true') {
+    if (req.session.loggedin == true) {
         
         const db = await dbPromise;
-    const users = await db.all('SELECT * FROM Users WHERE userKey = (?);', global.localStorage.getItem('userKey'));
+    const users = await db.all('SELECT * FROM Users WHERE userKey = (?);', req.session.userkey);
         
 
         
@@ -232,8 +258,8 @@ app.get('/openchat/:chatID', urlencodedParser, async (req, res) => {
         }
       
         let data = {
-            username: global.localStorage.getItem('userName'),
-            tag: global.localStorage.getItem("userKey"),
+            username: req.session.username,
+            tag: req.session.userkey,
             chats: chatstring
         }
 
@@ -243,6 +269,8 @@ app.get('/openchat/:chatID', urlencodedParser, async (req, res) => {
             userData: data
         });
 
+        
+
     }
     else
     res.sendFile(path.join(__dirname + '/templates/login.html'));
@@ -250,7 +278,7 @@ app.get('/openchat/:chatID', urlencodedParser, async (req, res) => {
 
 app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
     const db = await dbPromise;
-    const users = await db.all('SELECT * FROM Users WHERE userKey = (?);', global.localStorage.getItem('userKey'));
+    const users = await db.all('SELECT * FROM Users WHERE userKey = (?);', req.session.userkey);
         
 
         
@@ -284,7 +312,7 @@ app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
    
     if (req.body.newmessage != '') {
         chatdata.messages.push({
-            "sender": global.localStorage.getItem('userKey'),
+            "sender": req.session.userkey,
             "time": "undefined",
             "text": req.body.newmessage,
             "reactions": "none",
@@ -304,11 +332,13 @@ app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
     }
 
     let data = {
-        username: global.localStorage.getItem('userName'),
-        tag: global.localStorage.getItem('userKey'),
+        username: req.session.username,
+        tag: req.session.userkey,
         messages: msgs,
         chats: chatstring
     }
+
+    req.session.url = `/openchat/${req.params.chatID}`
 
     res.render('main', {
         userData: data
@@ -320,7 +350,7 @@ app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
 const setup = async () => {
     const db = await dbPromise;
     await db.migrate();
-    app.listen(5500, () => {
+    server.listen(5500, () => {
         console.log('Listening on port 5500...')
     })
 

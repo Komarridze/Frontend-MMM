@@ -59,12 +59,19 @@ text {
     padding-right:1vw;
 }
 
+#message-container {
+    overflow: auto;
+    margin:1vh 0 1vh 0;
+    overflow-anchor: none;
+}
+
 .searchbar {
     border-radius: 3px;
     padding-left: 1vw;
     outline: none;
     color:#000;
     border-color: transparent;
+    position: sticky;
 }
 
 #searchselector {
@@ -74,6 +81,7 @@ text {
     background-color: #2e3d4f;
     color:#fff;
     cursor: pointer !important;
+    position: sticky;
 }
 
 #searchselector::placeholder {
@@ -102,6 +110,7 @@ group:hover {
     outline: none;
     color:#edecec;
     border-color: transparent;
+    position: sticky;
 }
 
 .messagebar::placeholder {

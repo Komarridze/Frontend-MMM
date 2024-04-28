@@ -6,7 +6,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <meta charset="utf-8">
-    
+    <script type="text/javascript" src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <title>Kaktus</title>
     
 </head>
@@ -63,9 +63,12 @@
         <div class="app-bar" style="width: 80%;">a</div>
     </div>
 
+    
+    
 </body>
 
 <script>
+document.getElementById('message-container').lastElementChild.scrollIntoView();
 let chatForm = document.getElementById('chatform')
 let chatid = document.getElementById('chatID')
 
@@ -78,15 +81,16 @@ function connectChat(id) {
 
 // >> Keystroke
 let newmessage = document.getElementById('newmessage')
-
+const socket = io();
 
 function handleShortcut(event) {
     if (event.key === "Enter") {
         event.preventDefault();
         let currentUrlsbs = window.location.href.substring(window.location.href.lastIndexOf('/') + 1);
         if (currentUrlsbs != 'main' && currentUrlsbs != 'settings') {
-            console.log(document.getElementById('messagebar').value.replace('/"/g', '\\"'))
+            // console.log(document.getElementById('messagebar').value.replace('/"/g', '\\"'))
             newmessage.value = document.getElementById('messagebar').value.replace('/"/g', '\\"')
+            socket.emit('newmessage', currentUrlsbs)
             connectChat(currentUrlsbs)
             newmessage.value = '';
         }
@@ -95,7 +99,9 @@ function handleShortcut(event) {
 document.addEventListener("keydown", handleShortcut);
 
 // search
-
+socket.on('refreshchat', (chatid) => {
+    socket.emit('confirmrefreshchat', chatid)
+  });
 
 
 </script>
