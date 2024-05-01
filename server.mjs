@@ -43,19 +43,9 @@ const router = Router()
 const io = new Server(server)
 
 io.on('connection', (socket) => {
-    socket.on('newmessage', (def) => {
-        console.log('http://'+'localhost:5500'+'/openchat/'+def)
-            var clientServerOptions = {
-                uri: 'http://'+'localhost:5500'+'/openchat/'+def,
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }
-            request(clientServerOptions, function (error, response) {
-                return;
-            });
+    socket.on('newmessage', (value, tag) => {
         
+        io.emit('interconnect', value, tag)
 
     })
 })
@@ -334,7 +324,7 @@ app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
     
     let msgs = '';
     for (let message of chatdata.messages) {
-        msgs += `<msg class="inter"><i style="font-size:60%;color:lightgray;">${message.sender}: &nbsp;</i>${message.text}</msg>`;
+        msgs += `<msg class="inter"><i>${message.sender}: &nbsp;</i>${message.text}</msg>`;
     }
 
     let data = {

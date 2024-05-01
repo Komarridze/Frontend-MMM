@@ -68,9 +68,27 @@
 </body>
 
 <script>
+function fromHTML(html, trim = true) {
+  // Process the HTML string.
+  html = trim ? html.trim() : html;
+  if (!html) return null;
+
+  // Then set up a new template element.
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  const result = template.content.children;
+
+  // Then return either an HTMLElement or HTMLCollection,
+  // based on whether the input HTML had one or more roots.
+  if (result.length === 1) return result[0];
+  return result;
+}
+
+
 document.getElementById('message-container').lastElementChild != null ? document.getElementById('message-container').lastElementChild.scrollIntoView() : {};
 let chatForm = document.getElementById('chatform');
 let chatid = document.getElementById('chatID');
+let tag = document.querySelector('tg').innerHTML;
 
 function connectChat(id) {
     chatForm.action = `/openchat/${id}`;
@@ -91,16 +109,19 @@ function handleShortcut(event) {
             // console.log(document.getElementById('messagebar').value.replace('/"/g', '\\"'))
             newmessage.value = document.getElementById('messagebar').value.replace('/"/g', '\\"')
             connectChat(currentUrlsbs)
+            socket.emit('newmessage', newmessage.value, tag )
             newmessage.value = '';  
-            socket.emit('newmessage', currentUrlsbs)
         }
     }
 }
 document.addEventListener("keydown", handleShortcut);
 
-
+socket.on('interconnect', (value, tag) => {
+    var msg = document.getElementById('message-container').appendChild(fromHTML(`<msg class="inter"><i>${tag}: &nbsp;</i>${value}</msg>`))
+})
 
    
+
 
 
 </script>
