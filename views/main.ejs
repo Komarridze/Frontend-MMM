@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <head>
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="https://use.typekit.net/juw2amj.css">
@@ -39,7 +39,7 @@
         </div>
         <div id="message-container" class="inter" style="height: 88%;padding-top: 2vh;padding-bottom: 2vh;display: flex;flex-direction: column;">
             
-            <%- userData.messages %>
+        <%- userData.messages %>
         
         
         </div>
@@ -68,9 +68,9 @@
 </body>
 
 <script>
-document.getElementById('message-container').lastElementChild.scrollIntoView();
-let chatForm = document.getElementById('chatform')
-let chatid = document.getElementById('chatID')
+document.getElementById('message-container').lastElementChild != null ? document.getElementById('message-container').lastElementChild.scrollIntoView() : {};
+let chatForm = document.getElementById('chatform');
+let chatid = document.getElementById('chatID');
 
 function connectChat(id) {
     chatForm.action = `/openchat/${id}`;
@@ -90,18 +90,17 @@ function handleShortcut(event) {
         if (currentUrlsbs != 'main' && currentUrlsbs != 'settings') {
             // console.log(document.getElementById('messagebar').value.replace('/"/g', '\\"'))
             newmessage.value = document.getElementById('messagebar').value.replace('/"/g', '\\"')
-            socket.emit('newmessage', currentUrlsbs)
             connectChat(currentUrlsbs)
-            newmessage.value = '';
+            newmessage.value = '';  
+            socket.emit('newmessage', currentUrlsbs)
         }
     }
 }
 document.addEventListener("keydown", handleShortcut);
 
-// search
-socket.on('refreshchat', (chatid) => {
-    socket.emit('confirmrefreshchat', chatid)
-  });
+
+
+   
 
 
 </script>

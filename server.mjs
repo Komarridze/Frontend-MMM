@@ -21,6 +21,7 @@ import bodyParser from 'body-parser'
 import 'localstorage-polyfill'
 import {Router} from 'express'
 import session from 'express-session'
+import request from 'request'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -40,20 +41,25 @@ const server = createServer(app)
 const router = Router()
 
 const io = new Server(server)
+
 io.on('connection', (socket) => {
-    socket.on('newmessage', (chatid) => {
-        console.log('newmessage: ' + chatid)
-        io.emit('refreshchat', chatid)
+    socket.on('newmessage', (def) => {
+        console.log('http://'+'localhost:5500'+'/openchat/'+def)
+            var clientServerOptions = {
+                uri: 'http://'+'localhost:5500'+'/openchat/'+def,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+            request(clientServerOptions, function (error, response) {
+                return;
+            });
+        
+
     })
-    socket.on('confirmrefreshchat', (chatidx) => {
-        console.log('arara')
-    })
-});
+})
 
-
-
-
-    
 // >> TO home
 
 // ?debug console.log(global.localStorage.getItem("userName"))
@@ -263,7 +269,7 @@ app.get('/openchat/:chatID', urlencodedParser, async (req, res) => {
             chats: chatstring
         }
 
-       
+    
 
         res.render('main', {
             userData: data
@@ -338,12 +344,14 @@ app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
         chats: chatstring
     }
 
-    req.session.url = `/openchat/${req.params.chatID}`
+
+    
 
     res.render('main', {
         userData: data
 
     });
+
     
 });
 
