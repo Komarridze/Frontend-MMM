@@ -63,6 +63,7 @@ text {
     overflow: auto;
     margin:1vh 0 1vh 0;
     overflow-anchor: none;
+    word-wrap: break-word;
 }
 
 .searchbar {

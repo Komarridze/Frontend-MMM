@@ -185,7 +185,7 @@ app.post('/main', urlencodedParser, async (req, res) => {
 
                 for (let el of currentchats) {
                     let name = ''
-                    el.Initiate == user.userName ? name = el.Receiver : name = el.Initiate;
+                    el.Initiate == user.userKey ? name = el.Receiver : name = el.Initiate;
                     chatstring += `<group class="inter" onclick="connectChat(${el.Identifier})">${name}</group>`
                 }
 
@@ -296,7 +296,7 @@ app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
 
                 for (let el of currentchats) {
                     let name = ''
-                    el.Initiate == user.userName ? name = el.Receiver : name = el.Initiate;
+                    el.Initiate == user.userKey ? name = el.Receiver : name = el.Initiate;
                     chatstring += `<group class="inter" onclick="connectChat(${el.Identifier})">${name}</group>`
                 }
                 
