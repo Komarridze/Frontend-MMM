@@ -5,6 +5,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/867a828ed9.js" crossorigin="anonymous"></script>
     <meta charset="utf-8">
     <script type="text/javascript" src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <title>Kaktus</title>
@@ -24,13 +25,20 @@
     
     
     </div>
-    <div class="chats inter" style="width:15%;display: flex;flex-direction: column;gap: 2%;">
+    <div style="display: flex;flex-direction: column;width: 15%;">
+    <div class="chats inter" style="display: flex;flex-direction: column;gap: 3%;height: 95%;">
         <form method="POST" action="/openchat/chatID" id="chatform" style="display: none;"><input name="chatID" id="chatID" readonly><input name="newmessage" id="newmessage" readonly></form>
 
         
         <%- userData.chats %>
+        
+    </div>
+    <div style="height: 5%;display:flex;flex-direction: row-reverse;gap:5%;background-color: #1F3045;">
+        <circle style="color:#000;background-color: #F0DE54; width:4vh;height: 4vh;border-radius: 50%;margin-right: 5%;display:flex;justify-content: center;align-items: center;cursor: pointer !important;"><i class="fas fa-1x fa-comment-alt" style="color:#000"></i></circle>
+        <circle style="color:#000;background-color: #F0DE54; width:4vh;height: 4vh;border-radius: 50%;display:flex;justify-content: center;align-items: center;cursor: pointer !important;"><i class="fas fa-1x fa-quote-right" style="color:#000"></i></circle>
     
     </div>
+</div>
         <!-- SECTION MessageArea -->
     <div class="messagearea inter" style="width:80%;display: flex;flex-direction: column;">
         <div style="display: flex;flex-direction: row;height: 5%;">
@@ -60,7 +68,9 @@
             </fieldset>
         </div>
 
-        <div class="app-bar" style="width: 80%;">a</div>
+        <div class="app-bar" style="width: 80%;display: flex;align-items: center;padding-left:1vw;">
+            <div class="new-app" style="border: 2px solid #fff;border-radius: 50%;width:6vh;height: 6vh;cursor:pointer !important;display: flex;align-items: center;justify-content: center;"><b>+</b></div>
+        </div>
     </div>
 
     
