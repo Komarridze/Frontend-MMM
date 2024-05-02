@@ -36,9 +36,9 @@ text {
     background-color: #283D56;
     color:#fff;
     padding-top:1vh;
-    padding-left:1vw;
+    
     padding-bottom:1vh;
-    padding-right:1vw;
+    
 }
 
 .chats {
@@ -48,6 +48,8 @@ text {
     padding-left:1vw;
     padding-bottom:1vh;
     padding-right:1vw;
+    overflow: auto;
+    overflow-anchor: none;
 }
 
 .messagearea { 
@@ -91,18 +93,40 @@ text {
 
 group {
     border-radius: 3px;
-    background: #8496ac;
+    background: linear-gradient(to bottom, #1F0D2E 0 85%, rgb(44, 180, 44) 85% 100%);
     color:#fff;
     padding-left: 1vw;
     padding-right: 1vw;
+    padding-top: 1vh;
     height: 5%;
     font-size: 12px;
+    word-wrap: break-word;
+    cursor: pointer !important;
 }
 
 group:hover {
     background: #6d7c8f;
 }
 
+chn {
+    height: 6vh;
+    width: 6vh;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color:#F0DE54;
+    color:#000;
+    line-height: 100%;
+    text-align: center;
+    border-radius: 50%;
+    cursor: pointer !important;
+}
+
+chn:hover {
+    scale:1.1;
+}
 
 .messagebar {
     background-color: #2e3d4f;

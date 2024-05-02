@@ -22,6 +22,7 @@ import 'localstorage-polyfill'
 import {Router} from 'express'
 import session from 'express-session'
 import request from 'request'
+import { channel } from 'diagnostics_channel'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -63,44 +64,98 @@ app.get('/', urlencodedParser, async (req, res) => {
     if (req.session.loggedin != true)
     res.sendFile(path.join(__dirname + '/templates/login.html'))
     else{
-    let data = {
-        username: req.session.username,
-        tag: req.session.userkey
-    }
+        var userkey = req.session.userKey;
 
+        const db = await dbPromise;
+        const users = await db.all('SELECT * FROM Users WHERE userKey = (?);', userkey);
+        
 
+        
+        if (users.length != 0) {
+            const user = users[0];
+
+                // SECTION - Post to main (groups)
+                let chatarray = user.chats.split(';')
+                let currentchats = []
+                for (let el of chatarray) {
+                    let chat = await db.all('SELECT * FROM Directs WHERE Identifier = (?)', +el)
+                    chat.length == 0 ? {} : currentchats.push(chat[0])
+                }
+
+                
+
+                var chatstring = ''
+
+                for (let el of currentchats) {
+                    let name = ''
+                    el.Initiate == user.userKey ? name = el.Receiver : name = el.Initiate;
+                    chatstring += `<group class="inter" onclick="connectChat(${el.Identifier})">${name}</group>`
+                }
+
+                // SECTION - Post to main (channels)
+
+                let channelarray = user.channels.split(';')
+                let currentchannels = []
+                for (let el of channelarray) {
+                    let channel = await db.all('SELECT * FROM Channels WHERE Identifier = (?)', +el)
+                    channel.length == 0 ? {} : currentchannels.push(channel[0])
+                }
+
+                var channelstring = ''
+                
+                for (let el of currentchannels) {
+                    let name = ''
+                    for (let i = 0; i < (el.Name.split(' ').length > 3 ? 3 : el.Name.split(' ').length); i++) {
+                        name += el.Name.split(' ')[i][0]
+                    }
+
+                    channelstring += `<chn class="inter" onclick="connectChannel(${el.Identifier})">${name}</chn>`
+                }
+
+                    
+                let data = {
+                    username: user.userName,
+                    tag: userkey,
+                    chats: chatstring,
+                    channels: channelstring,
+                    branch: ':main'
+                }
+
+                req.session.loggedin = true
+                req.session.username = user.userName
+                req.session.userkey = userkey
+
+                
+
+                res.render('main', {
+                    userData: data
+
+                });
+
+            
 
     res.render('main', {
         userData: data
 
     });
-}
+
+
     
-})
+}}});
 
 // >> TO main
 
-app.get('/main', urlencodedParser, (req, res) => {
+app.get('/main', urlencodedParser, async (req, res) => {
     if (req.session.loggedin == true) {
         
-      
-        let data = {
-            username: req.session.username,
-            tag: req.session.userkey
-        }
-
-       
-
-        res.render('main', {
-            userData: data
-        });
-
     }
-    else
+    else 
+        
     res.sendFile(path.join(__dirname + '/templates/login.html'));
     
     
     
+
 
 });
 
@@ -171,7 +226,7 @@ app.post('/main', urlencodedParser, async (req, res) => {
             const user = users[0];
             if (user.userPassword == password) {
 
-
+                // SECTION - Post to main (groups)
                 let chatarray = user.chats.split(';')
                 let currentchats = []
                 for (let el of chatarray) {
@@ -189,15 +244,40 @@ app.post('/main', urlencodedParser, async (req, res) => {
                     chatstring += `<group class="inter" onclick="connectChat(${el.Identifier})">${name}</group>`
                 }
 
+                // SECTION - Post to main (channels)
+
+                let channelarray = user.channels.split(';')
+                let currentchannels = []
+                for (let el of channelarray) {
+                    let channel = await db.all('SELECT * FROM Channels WHERE Identifier = (?)', +el)
+                    channel.length == 0 ? {} : currentchannels.push(channel[0])
+                }
+
+                var channelstring = ''
+                
+                for (let el of currentchannels) {
+                    let name = ''
+                    for (let i = 0; i < (el.Name.split(' ').length > 3 ? 3 : el.Name.split(' ').length); i++) {
+                        name += el.Name.split(' ')[i][0]
+                    }
+
+                    channelstring += `<chn class="inter" onclick="connectChannel(${el.Identifier})">${name}</chn>`
+                }
+
+                    
                 let data = {
                     username: user.userName,
                     tag: userkey,
-                    chats: chatstring
+                    chats: chatstring,
+                    channels: channelstring,
+                    branch: ':main'
                 }
 
                 req.session.loggedin = true
                 req.session.username = user.userName
                 req.session.userkey = userkey
+
+                
 
                 res.render('main', {
                     userData: data
@@ -205,13 +285,13 @@ app.post('/main', urlencodedParser, async (req, res) => {
                 });
 
             }
-
-            else {res.sendFile(path.join(__dirname + '/templates/login.html'))}
         }
-
-        else {res.sendFile(path.join(__dirname + '/templates/login.html'))}
+            else {res.sendFile(path.join(__dirname + '/templates/login.html'))}
         
     }
+        else {res.sendFile(path.join(__dirname + '/templates/login.html'))}
+        
+    
     
  
     //! password.toLowerCase()
@@ -246,17 +326,37 @@ app.get('/openchat/:chatID', urlencodedParser, async (req, res) => {
 
                 for (let el of currentchats) {
                     let name = ''
-                    el.Initiate == user.userName ? name = el.Receiver : name = el.Initiate;
+                    el.Initiate == user.userKey ? name = el.Receiver : name = el.Initiate;
                     chatstring += `<group class="inter" onclick="connectChat(${el.Identifier})">${name}</group>`
                 }
                 
-            
+                let channelarray = user.channels.split(';')
+                let currentchannels = []
+                for (let el of channelarray) {
+                    let channel = await db.all('SELECT * FROM Channels WHERE Identifier = (?)', +el)
+                    channel.length == 0 ? {} : currentchannels.push(channel[0])
+                }
+
+                var channelstring = ''
+                
+                for (let el of currentchannels) {
+                    let name = ''
+                    for (let i = 0; i < (el.Name.split(' ').length > 3 ? 3 : el.Name.split(' ').length); i++) {
+                        name += el.Name.split(' ')[i][0]
+                    }
+
+                    channelstring += `<chn class="inter" onclick="connectChannel(${el.Identifier})">${name}</chn>`
+                }
+
+               
         }
       
         let data = {
             username: req.session.username,
             tag: req.session.userkey,
-            chats: chatstring
+            chats: chatstring,
+            channels: channelstring,
+            branch: ':main'
         }
 
     
@@ -299,6 +399,27 @@ app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
                     el.Initiate == user.userKey ? name = el.Receiver : name = el.Initiate;
                     chatstring += `<group class="inter" onclick="connectChat(${el.Identifier})">${name}</group>`
                 }
+
+                let channelarray = user.channels.split(';')
+                let currentchannels = []
+                for (let el of channelarray) {
+                    let channel = await db.all('SELECT * FROM Channels WHERE Identifier = (?)', +el)
+                    channel.length == 0 ? {} : currentchannels.push(channel[0])
+                }
+
+                var channelstring = ''
+                
+                for (let el of currentchannels) {
+                    let name = ''
+                    for (let i = 0; i < (el.Name.split(' ').length > 3 ? 3 : el.Name.split(' ').length); i++) {
+                        name += el.Name.split(' ')[i][0]
+                    }
+
+                    channelstring += `<chn class="inter" onclick="connectChannel(${el.Identifier})">${name}</chn>`
+                }
+
+                    
+            
                 
             
         }
@@ -331,7 +452,178 @@ app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
         username: req.session.username,
         tag: req.session.userkey,
         messages: msgs,
-        chats: chatstring
+        chats: chatstring,
+        channels: channelstring,
+        branch: (chatdata.initiate == req.session.userkey ? chatdata.receiver : chatdata.initiate)
+    }
+
+
+    
+
+    res.render('main', {
+        userData: data
+
+    });
+
+    
+});
+
+app.get('/openchannel/:chnID', urlencodedParser, async (req, res) => {
+    if (req.session.loggedin == true) {
+        
+        const db = await dbPromise;
+    const users = await db.all('SELECT * FROM Users WHERE userKey = (?);', req.session.userkey);
+        
+
+        
+        if (users.length != 0) {
+            const user = users[0];
+            
+
+
+                let chatarray = user.chats.split(';')
+                let currentchats = []
+                for (let el of chatarray) {
+                    let chat = await db.all('SELECT * FROM Directs WHERE Identifier = (?)', +el)
+                    chat.length == 0 ? {} : currentchats.push(chat[0])
+                }
+
+                
+
+                var chatstring = ''
+
+                for (let el of currentchats) {
+                    let name = ''
+                    el.Initiate == user.userKey ? name = el.Receiver : name = el.Initiate;
+                    chatstring += `<group class="inter" onclick="connectChat(${el.Identifier})">${name}</group>`
+                }
+                
+                let channelarray = user.channels.split(';')
+                let currentchannels = []
+                for (let el of channelarray) {
+                    let channel = await db.all('SELECT * FROM Channels WHERE Identifier = (?)', +el)
+                    channel.length == 0 ? {} : currentchannels.push(channel[0])
+                }
+
+                var channelstring = ''
+                
+                for (let el of currentchannels) {
+                    let name = ''
+                    for (let i = 0; i < (el.Name.split(' ').length > 3 ? 3 : el.Name.split(' ').length); i++) {
+                        name += el.Name.split(' ')[i][0]
+                    }
+
+                    channelstring += `<chn class="inter" onclick="connectChannel(${el.Identifier})">${name}</chn>`
+                }
+
+               
+        }
+      
+        let data = {
+            username: req.session.username,
+            tag: req.session.userkey,
+            chats: chatstring,
+            channels: channelstring,
+            branch: ':main'
+        }
+
+    
+
+        res.render('main', {
+            userData: data
+        });
+
+        
+
+    }
+    else
+    res.sendFile(path.join(__dirname + '/templates/login.html'));
+})
+
+app.post('/openchannel/:chnID', urlencodedParser, async (req, res) => {
+    const db = await dbPromise;
+    const users = await db.all('SELECT * FROM Users WHERE userKey = (?);', req.session.userkey);
+        
+
+        
+        if (users.length != 0) {
+            const user = users[0];
+            
+
+
+                let chatarray = user.chats.split(';')
+                let currentchats = []
+                for (let el of chatarray) {
+                    let chat = await db.all('SELECT * FROM Directs WHERE Identifier = (?)', +el)
+                    chat.length == 0 ? {} : currentchats.push(chat[0])
+                }
+
+                
+
+                var chatstring = ''
+
+                for (let el of currentchats) {
+                    let name = ''
+                    el.Initiate == user.userKey ? name = el.Receiver : name = el.Initiate;
+                    chatstring += `<group class="inter" onclick="connectChat(${el.Identifier})">${name}</group>`
+                }
+
+                let channelarray = user.channels.split(';')
+                let currentchannels = []
+                for (let el of channelarray) {
+                    let channel = await db.all('SELECT * FROM Channels WHERE Identifier = (?)', +el)
+                    channel.length == 0 ? {} : currentchannels.push(channel[0])
+                }
+
+                var channelstring = ''
+                
+
+                for (let el of currentchannels) {
+                    let name = ''
+                    for (let i = 0; i < (el.Name.split(' ').length > 3 ? 3 : el.Name.split(' ').length); i++) {
+                        name += el.Name.split(' ')[i][0]
+                    }
+
+                    channelstring += `<chn class="inter" onclick="connectChannel(${el.Identifier})">${name}</chn>`
+                }
+
+                    
+            
+                
+            
+        }
+
+    var chnID = req.params.chnID;
+    var chatdata = JSON.parse(fs.readFileSync(path.join(__dirname + `/private/channels/${chnID}.json`)));
+    
+    if (req.body.newmessage != '') {
+        chatdata.messages.push({
+            "sender": req.session.userkey,
+            "time": "undefined",
+            "text": req.body.newmessage,
+            "reactions": "none",
+            "status": "received"
+        })
+
+        fs.writeFileSync(path.join(__dirname + `/private/channels/${chnID}.json`), JSON.stringify(chatdata));
+        chatdata = JSON.parse(fs.readFileSync(path.join(__dirname + `/private/channels/${chnID}.json`)));
+
+    }
+
+
+    
+    let msgs = '';
+    for (let message of chatdata.messages) {
+        msgs += `<msg class="inter"><i>${message.sender}: &nbsp;</i>${message.text}</msg>`;
+    }
+
+    let data = {
+        username: req.session.username,
+        tag: req.session.userkey,
+        messages: msgs,
+        chats: chatstring,
+        channels: channelstring,
+        branch: chatdata.name
     }
 
 

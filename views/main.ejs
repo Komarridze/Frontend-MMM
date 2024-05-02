@@ -20,7 +20,7 @@
     <!-- ** This area is dynamic -->
     <div class="channels inter" style="width:5%;display: flex;flex-direction: column;">
     
-        <chn style="height: 5%;background-color:#F0DE54;color:#000;line-height: 100%;text-align: center;">кн</chn>
+        <%- userData.channels %>
     
     
     </div>
@@ -35,7 +35,7 @@
     <div class="messagearea inter" style="width:80%;display: flex;flex-direction: column;">
         <div style="display: flex;flex-direction: row;height: 5%;">
             <input name="srch-sel" id="searchselector" class="inter" placeholder=":main" style="width:5%;text-align: center;" readonly>
-            <input class="searchbar inter" style="width:20%; background-color: #F0DE54;margin-left:2%" placeholder="Пошук в <тут плейс>">
+            <input class="searchbar inter" style="width:20%; background-color: #F0DE54;margin-left:2%" placeholder="Пошук в <%- userData.branch -%>">
         </div>
         <div id="message-container" class="inter" style="height: 88%;padding-top: 2vh;padding-bottom: 2vh;display: flex;flex-direction: column;">
             
@@ -43,7 +43,7 @@
         
         
         </div>
-        <input id="messagebar" class="messagebar inter" style="height: 7%;" placeholder="Написати у :main" autofocus>
+        <input id="messagebar" class="messagebar inter" style="height: 7%;"  placeholder="Написати у <%- userData.branch -%>" autofocus>
     
     </div>
 
@@ -96,6 +96,11 @@ function connectChat(id) {
     chatForm.submit()
 }
 
+function connectChannel(id) {
+    chatForm.action = `/openchannel/${id}`;
+    chatid.value = id;
+    chatForm.submit();
+}
 
 // >> Keystroke
 let newmessage = document.getElementById('newmessage')
@@ -106,13 +111,32 @@ function handleShortcut(event) {
         event.preventDefault();
         let currentUrlsbs = window.location.href.substring(window.location.href.lastIndexOf('/') + 1);
         if (currentUrlsbs != 'main' && currentUrlsbs != 'settings') {
+            let specifier = window.location.href.substring(0, window.location.href.lastIndexOf('/'))
+            switch (specifier.substring(specifier.lastIndexOf('/') + 1)) 
+            {
+                case 'openchat':
+                    newmessage.value = document.getElementById('messagebar').value.replace('/"/g', '\\"')
+                    connectChat(currentUrlsbs)
+                    socket.emit('newmessage', newmessage.value, tag )
+
+                case 'openchannel':
+                    newmessage.value = document.getElementById('messagebar').value.replace('/"/g', '\\"')
+                    connectChannel(currentUrlsbs)
+                    socket.emit('newmessage', newmessage.value, tag )
+            }
             // console.log(document.getElementById('messagebar').value.replace('/"/g', '\\"'))
-            newmessage.value = document.getElementById('messagebar').value.replace('/"/g', '\\"')
-            connectChat(currentUrlsbs)
-            socket.emit('newmessage', newmessage.value, tag )
-            newmessage.value = '';  
+            
+            
         }
     }
+
+    // else if (event.key === "Tab") {
+    //     event.preventDefault()
+    //     document.getElementById('messagebar').value += '&#13;&#10;'
+    //     console.log(document.getElementById('messagebar').value)
+    // }
+
+    
 }
 document.addEventListener("keydown", handleShortcut);
 
