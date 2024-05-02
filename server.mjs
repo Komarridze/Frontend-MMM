@@ -121,10 +121,7 @@ app.get('/', urlencodedParser, async (req, res) => {
                     branch: ':main'
                 }
 
-                req.session.loggedin = true
-                req.session.username = user.userName
-                req.session.userkey = userkey
-
+                
                 
 
                 res.render('main', {
@@ -133,12 +130,6 @@ app.get('/', urlencodedParser, async (req, res) => {
                 });
 
             
-
-    res.render('main', {
-        userData: data
-
-    });
-
 
     
 }}});
@@ -205,15 +196,12 @@ app.post('/main', urlencodedParser, async (req, res) => {
 
         
 
-        else {
-            alert('Неправильні дані')
-            res.sendFile(path.join(__dirname + '/templates/login.html'))
-        } 
+        
         
 
-    }
+    } 
     
-    if (req.body.state == 'login') {
+    else if (req.body.state == 'login') {
         var userkey = req.body.userKey;
         var password = req.body.userPassword;
 
@@ -273,9 +261,9 @@ app.post('/main', urlencodedParser, async (req, res) => {
                     branch: ':main'
                 }
 
-                req.session.loggedin = true
-                req.session.username = user.userName
-                req.session.userkey = userkey
+                req.session.username = user.userName;
+                req.session.userkey = user.userKey;
+                req.session.loggedin = true;
 
                 
 
@@ -286,10 +274,10 @@ app.post('/main', urlencodedParser, async (req, res) => {
 
             }
         }
-            else {res.sendFile(path.join(__dirname + '/templates/login.html'))}
+        else {res.sendFile(path.join(__dirname + '/templates/login.html'))}
         
     }
-        else {res.sendFile(path.join(__dirname + '/templates/login.html'))}
+    else {res.sendFile(path.join(__dirname + '/templates/login.html'))}
         
     
     
@@ -373,6 +361,7 @@ app.get('/openchat/:chatID', urlencodedParser, async (req, res) => {
 })
 
 app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
+    
     const db = await dbPromise;
     const users = await db.all('SELECT * FROM Users WHERE userKey = (?);', req.session.userkey);
         
@@ -457,7 +446,7 @@ app.post('/openchat/:chatID', urlencodedParser, async (req, res) => {
         branch: (chatdata.initiate == req.session.userkey ? chatdata.receiver : chatdata.initiate)
     }
 
-
+    // console.log(data)
     
 
     res.render('main', {

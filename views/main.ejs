@@ -27,7 +27,7 @@
     <div class="chats inter" style="width:15%;display: flex;flex-direction: column;gap: 2%;">
         <form method="POST" action="/openchat/chatID" id="chatform" style="display: none;"><input name="chatID" id="chatID" readonly><input name="newmessage" id="newmessage" readonly></form>
 
-        <group class="inter" onclick="connectChat(1)">:dev-chat [unlocated]</group>
+        
         <%- userData.chats %>
     
     </div>
@@ -112,19 +112,26 @@ function handleShortcut(event) {
         let currentUrlsbs = window.location.href.substring(window.location.href.lastIndexOf('/') + 1);
         if (currentUrlsbs != 'main' && currentUrlsbs != 'settings') {
             let specifier = window.location.href.substring(0, window.location.href.lastIndexOf('/'))
+            specifier.substring(specifier.lastIndexOf('/') + 1)
             switch (specifier.substring(specifier.lastIndexOf('/') + 1)) 
             {
                 case 'openchat':
                     newmessage.value = document.getElementById('messagebar').value.replace('/"/g', '\\"')
                     connectChat(currentUrlsbs)
                     socket.emit('newmessage', newmessage.value, tag )
+                    newmessage.value = '';
+                    break;
 
                 case 'openchannel':
                     newmessage.value = document.getElementById('messagebar').value.replace('/"/g', '\\"')
                     connectChannel(currentUrlsbs)
                     socket.emit('newmessage', newmessage.value, tag )
+                    newmessage.value = '';
+                    break;
+                
+                default: {break;}
             }
-            // console.log(document.getElementById('messagebar').value.replace('/"/g', '\\"'))
+            console.log(document.getElementById('messagebar').value.replace('/"/g', '\\"'))
             
             
         }
