@@ -49,6 +49,10 @@ io.on('connection', (socket) => {
         io.emit('interconnect', value, tag)
 
     })
+
+    socket.on('newchat', (receiver) => {
+        
+    })
 })
 
 // >> TO home
